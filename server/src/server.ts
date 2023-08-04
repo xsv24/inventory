@@ -7,6 +7,7 @@ import {
   logger,
   loggingContextCreatorMiddleware,
 } from '@skutopia/logger';
+import config from './config';
 import { lifecycle } from './lifecycle/lifecycle';
 import { handleGetHealthz } from './routes/probes/healthz';
 import { handleGetOrders } from './routes/handleGetOrders';
@@ -14,7 +15,6 @@ import { handlePostOrders } from './routes/handlePostOrders';
 import { handlePostOrderBookings } from './routes/handlePostOrderBookings';
 
 export const startServer = () => {
-  const PORT = process.env.LOCAL_TESTING_PORT || 8044;
   const app = express();
 
   app.use(compression());
@@ -39,8 +39,8 @@ export const startServer = () => {
   app.post('/orders/:id/bookings', handlePostOrderBookings);
 
   app.use(errorLoggingMiddleware);
-  const server = app.listen(PORT, () => {
-    logger.info(`Server started on port ${PORT}`);
+  const server = app.listen(config.PORT, () => {
+    logger.info(`Server started on port ${config.PORT}`);
     lifecycle.on('close', () => {
       if (!server) {
         return;

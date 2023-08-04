@@ -2,6 +2,7 @@ import { RequestHandler } from 'express';
 import { logger } from '@skutopia/logger';
 import { withAsyncErrorHandling } from '../withAsyncErrorHandling';
 import { ordersRepo } from '../../repos/ordersRepo';
+import config from '../../config';
 
 export const handleGetHealthz: RequestHandler = withAsyncErrorHandling(
   async (req, res) => {
@@ -10,8 +11,8 @@ export const handleGetHealthz: RequestHandler = withAsyncErrorHandling(
       const queryResult = await ordersRepo.getOrders();
       if (queryResult) {
         res.status(200).json({
-          buildNumber: process.env.BUILD_NUMBER || 'local',
-          commitHash: process.env.COMMIT_HASH,
+          buildNumber: config.BUILD_NUMBER,
+          commitHash: config.COMMIT_HASH,
         });
         return;
       }
