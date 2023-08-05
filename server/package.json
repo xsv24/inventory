@@ -16,7 +16,7 @@
   },
   "scripts": {
     "start": "ts-node ./src/index.ts",
-    "prettier:fix": "npx prettier --write .",
+    "start:dev": "nodemon ./src/index.ts",
     "test": "npx mocha"
   },
   "mocha": {
