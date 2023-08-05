@@ -1,177 +1,163 @@
-import axios from "axios";
-import { expect } from "chai";
+import axios from 'axios';
+import { expect } from 'chai';
 import {
   calculateCarrierFees,
   generateQuote,
   loadFixture,
   SalesOrder,
-} from "./util";
+} from './util';
 
 const apiClient = axios.create({
-  baseURL: "http://localhost:8044/",
+  baseURL: 'http://localhost:8044/',
   validateStatus: function (status) {
     return status < 500; // Resolve only if the status code is less than 500
   },
 });
 
-const ORDERS =
-  loadFixture<{ salesOrders: SalesOrder[] }>("sales-orders.json").salesOrders;
+const ORDERS = loadFixture<{ salesOrders: SalesOrder[] }>(
+  'sales-orders.json'
+).salesOrders;
 
-describe("A mini SKUTOPIA API", () => {
-  it("should successfully receive an order", async () => {
-    const result = await apiClient.post(
-      "/orders",
-      ORDERS[0]
-    );
+describe('A mini SKUTOPIA API', () => {
+  it('should successfully receive an order', async () => {
+    const result = await apiClient.post('/orders', ORDERS[0]);
     expect(result.status).to.eq(200);
     expect(result.data).to.deep.eq({
-      outcome: "SUCCESS",
+      outcome: 'SUCCESS',
       order: {
         ...ORDERS[0],
         quotes: [],
-        status: "RECEIVED",
+        status: 'RECEIVED',
       },
     });
   });
-  it("should list all orders", async () => {
-    const result = await apiClient.get("/orders");
+  it('should list all orders', async () => {
+    const result = await apiClient.get('/orders');
     expect(result.status).to.eq(200);
     expect(result.data).to.deep.eq({
-      orders: [{ ...ORDERS[0], status: "RECEIVED", quotes: [] }],
+      orders: [{ ...ORDERS[0], status: 'RECEIVED', quotes: [] }],
     });
   });
-  it("receives more orders", async () => {
-    const result1 = apiClient.post("/orders", ORDERS[1]);
-    const result2 = apiClient.post("/orders", ORDERS[2]);
+  it('receives more orders', async () => {
+    const result1 = apiClient.post('/orders', ORDERS[1]);
+    const result2 = apiClient.post('/orders', ORDERS[2]);
     expect((await result1).status).to.eq(200);
     expect((await result2).status).to.eq(200);
   });
-  it("should generate a quote for a RECEIVED order", async () => {
-    const result = await apiClient.post(
-      `/orders/${ORDERS[0].id}/quotes`,
-      {
-        carriers: ["UPS", "USPS", "FEDEX"],
-      }
-    );
+  it('should generate a quote for a RECEIVED order', async () => {
+    const result = await apiClient.post(`/orders/${ORDERS[0].id}/quotes`, {
+      carriers: ['UPS', 'USPS', 'FEDEX'],
+    });
     expect(result.status).to.eq(200);
     expect(result.data).to.deep.eq({
-      outcome: "SUCCESS",
+      outcome: 'SUCCESS',
       order: {
         ...ORDERS[0],
-        status: "QUOTED",
+        status: 'QUOTED',
         quotes: [
-          generateQuote(ORDERS[0], "UPS"),
-          generateQuote(ORDERS[0], "USPS"),
-          generateQuote(ORDERS[0], "FEDEX"),
+          generateQuote(ORDERS[0], 'UPS'),
+          generateQuote(ORDERS[0], 'USPS'),
+          generateQuote(ORDERS[0], 'FEDEX'),
         ],
       },
     });
   });
-  it("should return 404 for a non-existent order", async () => {
+  it('should return 404 for a non-existent order', async () => {
     const result = await apiClient.post(`/orders/123456/quotes`, {
-      carriers: ["UPS", "FEDEX", "USPS"],
+      carriers: ['UPS', 'FEDEX', 'USPS'],
     });
     expect(result.status).to.eq(404);
     expect(result.data).to.deep.eq({
-      outcome: "ORDER_NOT_FOUND",
+      outcome: 'ORDER_NOT_FOUND',
     });
   });
-  it("should successfully book an order", async () => {
-    const result = await apiClient.post(
-      `/orders/${ORDERS[0].id}/bookings`,
-      {
-        carrier: "UPS",
-      }
-    );
+  it('should successfully book an order', async () => {
+    const result = await apiClient.post(`/orders/${ORDERS[0].id}/bookings`, {
+      carrier: 'UPS',
+    });
     expect(result.status).to.eq(200);
     expect(result.data).to.deep.eq({
-      outcome: "SUCCESS",
+      outcome: 'SUCCESS',
       order: {
         ...ORDERS[0],
-        status: "BOOKED",
+        status: 'BOOKED',
         quotes: [
-          generateQuote(ORDERS[0], "UPS"),
-          generateQuote(ORDERS[0], "USPS"),
-          generateQuote(ORDERS[0], "FEDEX"),
+          generateQuote(ORDERS[0], 'UPS'),
+          generateQuote(ORDERS[0], 'USPS'),
+          generateQuote(ORDERS[0], 'FEDEX'),
         ],
-        carrierPricePaid: calculateCarrierFees("UPS", ORDERS[0].items),
-        carrierBooked: "UPS",
+        carrierPricePaid: calculateCarrierFees('UPS', ORDERS[0].items),
+        carrierBooked: 'UPS',
       },
     });
   });
-  it("should return NO MATCHING QUOTE when attempting to book an order without a matching quote", async () => {
+  it('should return NO MATCHING QUOTE when attempting to book an order without a matching quote', async () => {
     await apiClient.post(`/orders/${ORDERS[1].id}/quotes`, {
-      carriers: ["USPS", "FEDEX"],
+      carriers: ['USPS', 'FEDEX'],
     });
-    const result = await apiClient.post(
-      `/orders/${ORDERS[1].id}/bookings`,
-      {
-        carrier: "UPS",
-      }
-    );
+    const result = await apiClient.post(`/orders/${ORDERS[1].id}/bookings`, {
+      carrier: 'UPS',
+    });
     expect(result.status).to.eq(400);
     expect(result.data).to.deep.eq({
-      outcome: "NO_MATCHING_QUOTE",
+      outcome: 'NO_MATCHING_QUOTE',
       quotes: [
-        generateQuote(ORDERS[1], "USPS"),
-        generateQuote(ORDERS[1], "FEDEX"),
+        generateQuote(ORDERS[1], 'USPS'),
+        generateQuote(ORDERS[1], 'FEDEX'),
       ],
     });
   });
-  it("should return ORDER ALREADY BOOKED when requesting a quote for a BOOKED order", async () => {
-    const result = await apiClient.post(
-      `/orders/${ORDERS[0].id}/quotes`,
-      {
-        carriers: ["UPS", "FEDEX", "USPS"],
-      }
-    );
+  it('should return ORDER ALREADY BOOKED when requesting a quote for a BOOKED order', async () => {
+    const result = await apiClient.post(`/orders/${ORDERS[0].id}/quotes`, {
+      carriers: ['UPS', 'FEDEX', 'USPS'],
+    });
     expect(result.status).to.eq(400);
     expect(result.data).to.deep.eq({
-      outcome: "ORDER_ALREADY_BOOKED",
+      outcome: 'ORDER_ALREADY_BOOKED',
     });
   });
-  it("should list more orders", async () => {
-    const result = await apiClient.get("/orders");
+  it('should list more orders', async () => {
+    const result = await apiClient.get('/orders');
     expect(result.status).to.eq(200);
     expect(result.data).to.deep.eq({
       orders: [
         {
           ...ORDERS[0],
-          status: "BOOKED",
-          carrierPricePaid: calculateCarrierFees("UPS", ORDERS[0].items),
-          carrierBooked: "UPS",
+          status: 'BOOKED',
+          carrierPricePaid: calculateCarrierFees('UPS', ORDERS[0].items),
+          carrierBooked: 'UPS',
           quotes: [
-            generateQuote(ORDERS[0], "UPS"),
-            generateQuote(ORDERS[0], "USPS"),
-            generateQuote(ORDERS[0], "FEDEX"),
+            generateQuote(ORDERS[0], 'UPS'),
+            generateQuote(ORDERS[0], 'USPS'),
+            generateQuote(ORDERS[0], 'FEDEX'),
           ],
         },
         {
           ...ORDERS[1],
-          status: "QUOTED",
+          status: 'QUOTED',
           quotes: [
-            generateQuote(ORDERS[1], "USPS"),
-            generateQuote(ORDERS[1], "FEDEX"),
+            generateQuote(ORDERS[1], 'USPS'),
+            generateQuote(ORDERS[1], 'FEDEX'),
           ],
         },
-        { ...ORDERS[2], status: "RECEIVED", quotes: [] },
+        { ...ORDERS[2], status: 'RECEIVED', quotes: [] },
       ],
     });
   });
-  it("should list the BOOKED orders", async () => {
-    const result = await apiClient.get("/orders?status=BOOKED");
+  it('should list the BOOKED orders', async () => {
+    const result = await apiClient.get('/orders?status=BOOKED');
     expect(result.status).to.eq(200);
     expect(result.data).to.deep.eq({
       orders: [
         {
           ...ORDERS[0],
-          status: "BOOKED",
-          carrierPricePaid: calculateCarrierFees("UPS", ORDERS[0].items),
-          carrierBooked: "UPS",
+          status: 'BOOKED',
+          carrierPricePaid: calculateCarrierFees('UPS', ORDERS[0].items),
+          carrierBooked: 'UPS',
           quotes: [
-            generateQuote(ORDERS[0], "UPS"),
-            generateQuote(ORDERS[0], "USPS"),
-            generateQuote(ORDERS[0], "FEDEX"),
+            generateQuote(ORDERS[0], 'UPS'),
+            generateQuote(ORDERS[0], 'USPS'),
+            generateQuote(ORDERS[0], 'FEDEX'),
           ],
         },
       ],

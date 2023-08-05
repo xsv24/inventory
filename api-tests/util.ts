@@ -1,6 +1,6 @@
-import * as fs from "fs";
+import * as fs from 'fs';
 
-export type Carrier = "UPS" | "FEDEX" | "USPS";
+export type Carrier = 'UPS' | 'FEDEX' | 'USPS';
 
 export type SalesOrder = {
   id: string;
@@ -19,18 +19,18 @@ export type ShippingQuote = {
 };
 
 export const loadFixture = <T>(path: string): T =>
-  JSON.parse(fs.readFileSync(`${__dirname}/${path}`, "utf8"));
+  JSON.parse(fs.readFileSync(`${__dirname}/${path}`, 'utf8'));
 
 export const calculateCarrierFees = (
   carrier: Carrier,
-  items: SalesOrder["items"]
+  items: SalesOrder['items']
 ): number => {
   switch (carrier) {
-    case "UPS":
+    case 'UPS':
       return items.reduce((acc, item) => acc + item.gramsPerItem * 0.05, 800);
-    case "USPS":
+    case 'USPS':
       return items.reduce((acc, item) => acc + item.gramsPerItem * 0.02, 1050);
-    case "FEDEX":
+    case 'FEDEX':
       return items.reduce((acc, item) => acc + item.gramsPerItem * 0.03, 1000);
     default:
       throw new Error(`Unknown carrier: ${carrier}`);

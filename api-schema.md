@@ -8,29 +8,29 @@ Returns a list of all orders in the system.
 
 ```ts
 {
-    orders: Array<{
-        id: string,
-        status: 'RECEIVED' | 'QUOTED' | 'BOOKED' | 'CANCELLED',
-        customer: string,
-        items: Array<{
-            sku: string,
-            quantity: number,
-            gramsPerItem: number,
-            price: number
-        }>
-        carrierPricePaid?: number;
-        carrierBooked?: 'UPS' | 'FEDEX' | 'USPS';
-        quotes: Array<{
-            carrier: 'UPS' | 'FEDEX' | 'USPS',
-            priceCents: number
-        }>
-    }>
+  orders: Array<{
+    id: string;
+    status: 'RECEIVED' | 'QUOTED' | 'BOOKED' | 'CANCELLED';
+    customer: string;
+    items: Array<{
+      sku: string;
+      quantity: number;
+      gramsPerItem: number;
+      price: number;
+    }>;
+    carrierPricePaid?: number;
+    carrierBooked?: 'UPS' | 'FEDEX' | 'USPS';
+    quotes: Array<{
+      carrier: 'UPS' | 'FEDEX' | 'USPS';
+      priceCents: number;
+    }>;
+  }>;
 }
 ```
 
 #### Filters
 
-* `status`: filter by status, e.g. `/orders?status=RECEIVED`
+- `status`: filter by status, e.g. `/orders?status=RECEIVED`
 
 ### `POST /orders`
 
@@ -40,14 +40,14 @@ Creates a new order
 
 ```ts
 {
-    id: string;
-    customer: string;
-    items: Array<{
-        sku: string,
-        quantity: number,
-        gramsPerItem: number,
-        price: number
-    }>
+  id: string;
+  customer: string;
+  items: Array<{
+    sku: string;
+    quantity: number;
+    gramsPerItem: number;
+    price: number;
+  }>;
 }
 ```
 
@@ -61,10 +61,10 @@ Creates a new order
     status: 'RECEIVED';
     customer: string;
     items: Array<{
-      sku: string,
-      quantity: number,
-      gramsPerItem: number,
-      price: number
+      sku: string;
+      quantity: number;
+      gramsPerItem: number;
+      price: number;
     }>;
     quotes: [];
   }
@@ -79,7 +79,7 @@ Generate quotes for an order for the given carriers and returns the quotes. Upda
 
 ```ts
 {
-    carriers: Array<'UPS' | 'FEDEX' | 'USPS'>
+  carriers: Array<'UPS' | 'FEDEX' | 'USPS'>;
 }
 ```
 
@@ -93,14 +93,14 @@ Generate quotes for an order for the given carriers and returns the quotes. Upda
     status: 'RECEIVED';
     customer: string;
     items: Array<{
-      sku: string,
-      quantity: number,
-      gramsPerItem: number,
-      price: number
+      sku: string;
+      quantity: number;
+      gramsPerItem: number;
+      price: number;
     }>;
     quotes: Array<{
-      carrier: 'UPS' | 'FEDEX' | 'USPS',
-      priceCents: number
+      carrier: 'UPS' | 'FEDEX' | 'USPS';
+      priceCents: number;
     }>;
   }
 }
@@ -108,15 +108,15 @@ Generate quotes for an order for the given carriers and returns the quotes. Upda
 
 ### `POST /orders/:id/bookings`
 
-* Creates a booking for the given carrier and updates the order status to `BOOKED`.
-* Returns the booking details.
-* If a quote for the requested carrier booking is not available, returns a 400 error.
+- Creates a booking for the given carrier and updates the order status to `BOOKED`.
+- Returns the booking details.
+- If a quote for the requested carrier booking is not available, returns a 400 error.
 
 #### Request Schema
 
 ```ts
 {
-    carrier: 'UPS' | 'FEDEX' | 'USPS'
+  carrier: 'UPS' | 'FEDEX' | 'USPS';
 }
 ```
 
@@ -130,14 +130,14 @@ Generate quotes for an order for the given carriers and returns the quotes. Upda
     status: 'RECEIVED';
     customer: string;
     items: Array<{
-      sku: string,
-      quantity: number,
-      gramsPerItem: number,
-      price: number
+      sku: string;
+      quantity: number;
+      gramsPerItem: number;
+      price: number;
     }>;
     quotes: Array<{
-      carrier: 'UPS' | 'FEDEX' | 'USPS',
-      priceCents: number
+      carrier: 'UPS' | 'FEDEX' | 'USPS';
+      priceCents: number;
     }>;
     carrierBooked: 'UPS' | 'FEDEX' | 'USPS';
     carrierPricePaid: number;
