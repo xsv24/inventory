@@ -1,10 +1,6 @@
 import { withAsyncErrorHandling } from './middleware/withAsyncErrorHandling';
 import { carrierCodeSchema } from '../domain/entities';
 import { z } from 'zod-http-schemas';
-import {
-  bookCarrier,
-  BookCarrierResult,
-} from '../domain/operations/bookCarrier';
 import { validationHandler } from './middleware/validation';
 import {
   createOrderQuote,

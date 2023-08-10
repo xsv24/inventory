@@ -1,4 +1,4 @@
-import { z } from 'zod-http-schemas';
+import { z } from 'zod';
 
 export const carrierCodeSchema = z.enum(['UPS', 'FEDEX', 'USPS']);
 

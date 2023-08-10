@@ -1,16 +1,15 @@
+import { carrierRepo } from '../../../repos/carrierRepo';
 import { CarrierCode, CarrierQuote, Order } from '../../entities';
 
 type Success = {
   outcome: 'SUCCESS';
   order: Order;
 };
-
 type InvalidOrderStatus = {
   outcome: 'INVALID_ORDER_STATUS';
   expected: 'RECEIVED';
   actual: Order['status'];
 };
-
 type OrderNotFound = {
   outcome: 'ORDER_NOT_FOUND';
 };
@@ -30,21 +29,6 @@ export type CreateOrderQuoteResult =
   | OrderAlreadyBooked
   | CarrierAlreadyQuoted;
 
-// TODO: Carrier's should be persisted in their own repository
-export const calculateCarrierFees = (
-  carrier: CarrierCode,
-  items: Order['items']
-): number => {
-  switch (carrier) {
-    case 'UPS':
-      return items.reduce((acc, item) => acc + item.gramsPerItem * 0.05, 800);
-    case 'USPS':
-      return items.reduce((acc, item) => acc + item.gramsPerItem * 0.02, 1050);
-    case 'FEDEX':
-      return items.reduce((acc, item) => acc + item.gramsPerItem * 0.03, 1000);
-  }
-};
-
 export const deriveOrderQuoteResult = (
   order: Order | undefined,
   carriers: CarrierCode[]
@@ -62,15 +46,6 @@ export const deriveOrderQuoteResult = (
       return deriveInvalidState(order.status);
   }
 };
-
-const deriveCarrierQuotes = (
-  carriers: CarrierCode[],
-  items: Order['items']
-): CarrierQuote[] =>
-  carriers.map((carrier) => ({
-    carrier,
-    priceCents: calculateCarrierFees(carrier, items),
-  }));
 
 const deriveQuotedState = (
   order: Order,
@@ -108,6 +83,12 @@ const deriveQuotedState = (
     },
   };
 };
+
+const deriveCarrierQuotes = (
+  carriers: CarrierCode[],
+  items: Order['items']
+): CarrierQuote[] =>
+  carriers.map((carrier) => carrierRepo.createQuote(carrier, items));
 
 const deriveReceivedState = (
   order: Order,
