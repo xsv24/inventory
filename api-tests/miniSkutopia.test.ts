@@ -215,22 +215,68 @@ describe('A mini SKUTOPIA API', () => {
     });
   });
 
-  it('Validation checks', async () => {
-    const result = await apiClient.get('/orders?status=INVALID_STATUS');
+  describe('Validation checks', () => {
+    it('GET orders status query params is validated', async () => {
+      const result = await apiClient.get('/orders?status=INVALID_STATUS');
 
-    expect(result.status).to.eq(400);
-    expect(result.data).to.deep.eq({
-      error: 'INVALID_QUERY_PARAMETER',
-      details: [
-        {
-          code: 'invalid_enum_value',
-          message:
-            "Invalid enum value. Expected 'RECEIVED' | 'QUOTED' | 'BOOKED' | 'CANCELLED', received 'INVALID_STATUS'",
-          options: ['RECEIVED', 'QUOTED', 'BOOKED', 'CANCELLED'],
-          path: ['status'],
-          received: 'INVALID_STATUS',
-        },
-      ],
+      expect(result.status).to.eq(400);
+      expect(result.data).to.deep.eq({
+        error: 'INVALID_QUERY_PARAMETER',
+        details: [
+          {
+            code: 'invalid_enum_value',
+            message:
+              "Invalid enum value. Expected 'RECEIVED' | 'QUOTED' | 'BOOKED' | 'CANCELLED', received 'INVALID_STATUS'",
+            options: ['RECEIVED', 'QUOTED', 'BOOKED', 'CANCELLED'],
+            path: ['status'],
+            received: 'INVALID_STATUS',
+          },
+        ],
+      });
+    });
+
+    it('POST bookings request body is validated', async () => {
+      const order = unwrap(ORDERS[0]);
+      const result = await apiClient.post(`/orders/${order.id}/bookings`, {
+        carrier: 'INVALID_CARRIER',
+      });
+
+      expect(result.status).to.eq(400);
+      expect(result.data).to.deep.eq({
+        error: 'INVALID_REQUEST_BODY',
+        details: [
+          {
+            code: 'invalid_enum_value',
+            message:
+              "Invalid enum value. Expected 'UPS' | 'FEDEX' | 'USPS', received 'INVALID_CARRIER'",
+            options: ['UPS', 'FEDEX', 'USPS'],
+            path: ['carrier'],
+            received: 'INVALID_CARRIER',
+          },
+        ],
+      });
+    });
+
+    it('POST quotes request body is validated', async () => {
+      const order = unwrap(ORDERS[0]);
+      const result = await apiClient.post(`/orders/${order.id}/quotes`, {
+        carriers: ['INVALID_CARRIER'],
+      });
+
+      expect(result.status).to.eq(400);
+      expect(result.data).to.deep.eq({
+        error: 'INVALID_REQUEST_BODY',
+        details: [
+          {
+            code: 'invalid_enum_value',
+            message:
+              "Invalid enum value. Expected 'UPS' | 'FEDEX' | 'USPS', received 'INVALID_CARRIER'",
+            options: ['UPS', 'FEDEX', 'USPS'],
+            path: ['carriers', 0],
+            received: 'INVALID_CARRIER',
+          },
+        ],
+      });
     });
   });
 });
