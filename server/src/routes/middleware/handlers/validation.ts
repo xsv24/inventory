@@ -1,9 +1,9 @@
 import { NextFunction, Request, RequestHandler, Response } from 'express';
-import { validatorContext } from '../validators/requestValidator';
+import { validatorContext } from '../../validators/requestValidator';
 import {
   VALIDATION_STATUS_CODE_MAP,
   ValidationResponseError,
-} from '../models/error';
+} from '../../models/error';
 
 export type ValidRequest<Params, Query, Body> = {
   params: Params;

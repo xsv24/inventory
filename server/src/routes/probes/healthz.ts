@@ -1,6 +1,6 @@
 import { Request, RequestHandler, Response } from 'express';
 import { logger } from '@skutopia/logger';
-import { withAsyncErrorHandling } from '../middleware/withAsyncErrorHandling';
+import { withAsyncErrorHandling } from '../middleware/handlers';
 import { ordersRepo } from '../../repos/ordersRepo';
 import config from '../../config';
 

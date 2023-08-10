@@ -1,11 +1,7 @@
 import * as express from 'express';
-import * as compression from 'compression';
-import helmet from 'helmet';
 import {
-  configureAccessLoggingMiddleware,
   errorLoggingMiddleware,
   logger,
-  loggingContextCreatorMiddleware,
 } from '@skutopia/logger';
 import config from './config';
 import { lifecycle } from './lifecycle/lifecycle';
@@ -14,27 +10,17 @@ import { handleGetOrders } from './routes/handleGetOrders';
 import { handlePostOrders } from './routes/handlePostOrders';
 import { handlePostOrderBookings } from './routes/handlePostOrderBookings';
 import { handlePostOrderQuotes } from './routes/handlePostOrderQuotes';
+import { withMiddleware } from './routes/middleware';
 
 export const startServer = () => {
-  const app = express();
+  const app = withMiddleware(express(), {
 
-  app.use(compression());
-  app.use(
-    helmet({
-      // TODO: Make this more secure
-      contentSecurityPolicy: false,
-    })
-  );
-  app.use(express.json());
-  app.use(loggingContextCreatorMiddleware);
-  app.use(
-    configureAccessLoggingMiddleware({
       ignoredRoutes: ['/healthz'],
-    })
-  );
-  app.get('/healthz', handleGetHealthz);
+  });
+  
 
   // routes
+  app.get('/healthz', handleGetHealthz);
   app.get('/orders', handleGetOrders);
   app.post('/orders', handlePostOrders);
   app.post('/orders/:id/quotes', handlePostOrderQuotes);

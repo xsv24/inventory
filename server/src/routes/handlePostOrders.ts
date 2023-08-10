@@ -1,11 +1,10 @@
-import { withAsyncErrorHandling } from './middleware/withAsyncErrorHandling';
-import { z } from 'zod';
+import { z } from 'zod-http-schemas';
 import {
   createOrder,
   CreateOrderResult,
 } from '../domain/operations/createOrder';
 import { orderInputSchema } from '../domain/entities';
-import { validationHandler } from './middleware/validation';
+import { validationHandler, withAsyncErrorHandling } from './middleware/handlers';
 
 const schema = {
   body: orderInputSchema,
