@@ -1,8 +1,5 @@
 import * as express from 'express';
-import {
-  errorLoggingMiddleware,
-  logger,
-} from '@skutopia/logger';
+import { errorLoggingMiddleware, logger } from '@skutopia/logger';
 import config from './config';
 import { lifecycle } from './lifecycle/lifecycle';
 import { handleGetHealthz } from './routes/probes/healthz';
@@ -14,10 +11,8 @@ import { withMiddleware } from './routes/middleware';
 
 export const startServer = () => {
   const app = withMiddleware(express(), {
-
-      ignoredRoutes: ['/healthz'],
+    ignoredRoutes: ['/healthz'],
   });
-  
 
   // routes
   app.get('/healthz', handleGetHealthz);

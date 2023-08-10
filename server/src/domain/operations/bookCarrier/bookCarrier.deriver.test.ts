@@ -22,6 +22,7 @@ describe('bookCarrier.deriver', () => {
     const result = deriveBookCarrierOutcome(undefined, 'UPS');
     expect(result.outcome).to.eq('ORDER_NOT_FOUND');
   });
+
   it('returns ORDER ALREADY BOOKED when passed a booked order', () => {
     const result = deriveBookCarrierOutcome(
       {
@@ -32,6 +33,7 @@ describe('bookCarrier.deriver', () => {
     );
     expect(result.outcome).to.eq('ORDER_ALREADY_BOOKED');
   });
+
   it('returns NO MATCHING QUOTE when a quote does not exist for requested carrier', () => {
     const quotes: Order['quotes'] = [
       {
@@ -72,7 +74,7 @@ describe('bookCarrier.deriver', () => {
       order: {
         ...order,
         status: 'BOOKED',
-        carrierPricePaid: order.quotes[0].priceCents,
+        carrierPricePaid: order.quotes[0]!.priceCents,
         carrierBooked: 'UPS',
       },
     });

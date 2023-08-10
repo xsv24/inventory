@@ -60,7 +60,6 @@ describe('createOrderQuote.deriver', () => {
 
       const expected: CreateOrderQuoteResult = {
         outcome: 'CARRIER_ALREADY_QUOTED',
-        order,
         quote,
       };
       expect(result).to.deep.eq(expected);

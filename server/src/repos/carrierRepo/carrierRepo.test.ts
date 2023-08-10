@@ -24,8 +24,8 @@ describe('carrierRepo', () => {
     const price = carrierRepo.calculatePricingInCents(pricing, items);
 
     const price1 =
-      pricing.minCentPrice + items[0].gramsPerItem * pricing.gramsPerItemRate;
-    const price2 = price1 + items[1].gramsPerItem * pricing.gramsPerItemRate;
+      pricing.minCentPrice + items[0]!.gramsPerItem * pricing.gramsPerItemRate;
+    const price2 = price1 + items[1]!.gramsPerItem * pricing.gramsPerItemRate;
 
     expect(price).to.eq(price2);
   });
@@ -37,7 +37,7 @@ describe('carrierRepo', () => {
     const fedex = carrierRepo.createQuote('FEDEX', items);
 
     const expected = (pricing: CarrierPricing): number =>
-      items[0].gramsPerItem * pricing.gramsPerItemRate + pricing.minCentPrice;
+        items.reduce((total, item) => total + item.gramsPerItem * pricing.gramsPerItemRate, pricing.minCentPrice)
 
     expect(ups.priceCents).to.deep.eq(expected(UPS));
     expect(usps.priceCents).to.eq(expected(USPS));
