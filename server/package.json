@@ -17,7 +17,7 @@
   "scripts": {
     "start": "ts-node ./src/index.ts",
     "start:dev": "nodemon ./src/index.ts",
-    "build": "rm -rf ./dist && tsc --outDir ./dist",
+    "build": "rm -rf ./dist && tsc",
     "test": "mocha"
   },
   "mocha": {
