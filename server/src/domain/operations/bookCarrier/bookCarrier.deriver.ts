@@ -1,4 +1,4 @@
-import { CarrierCode, Order } from '../../entities';
+import { CarrierCode, CarrierQuote, Order } from '../../entities';
 
 type Success = {
   outcome: 'SUCCESS';
@@ -32,31 +32,27 @@ export const deriveBookCarrierOutcome = (
   order: Order | undefined,
   carrier: CarrierCode
 ): BookCarrierResult => {
-  if (!order) {
-    return {
-      outcome: 'ORDER_NOT_FOUND',
-    };
+  switch (order?.status) {
+    case undefined:
+      return deriveNotFoundState();
+    case 'BOOKED':
+      return deriveAlreadyBookedState(order);
+    case 'RECEIVED':
+    case 'CANCELLED':
+      return deriveInvalidOrderStatus(order.status);
+    case 'QUOTED':
+      return deriveBookedState(order, carrier);
   }
-  if (order.status === 'BOOKED') {
-    return {
-      outcome: 'ORDER_ALREADY_BOOKED',
-      order,
-    };
-  }
-  if (order.status !== 'QUOTED') {
-    return {
-      outcome: 'INVALID_ORDER_STATUS',
-      expected: 'QUOTED',
-      actual: order.status,
-    };
-  }
+};
 
+const deriveBookedState = (
+  order: Order,
+  carrier: CarrierCode
+): BookCarrierResult => {
   const quote = order.quotes.find((q) => q.carrier === carrier);
+
   if (!quote) {
-    return {
-      outcome: 'NO_MATCHING_QUOTE',
-      quotes: order.quotes,
-    };
+    return deriveNoMatchingQuoteState(order.quotes);
   }
 
   return {
@@ -69,3 +65,27 @@ export const deriveBookCarrierOutcome = (
     },
   };
 };
+
+const deriveNotFoundState = (): BookCarrierResult => ({
+  outcome: 'ORDER_NOT_FOUND',
+});
+
+const deriveAlreadyBookedState = (order: Order): BookCarrierResult => ({
+  outcome: 'ORDER_ALREADY_BOOKED',
+  order,
+});
+
+const deriveNoMatchingQuoteState = (
+  quotes: CarrierQuote[]
+): BookCarrierResult => ({
+  outcome: 'NO_MATCHING_QUOTE',
+  quotes: quotes,
+});
+
+const deriveInvalidOrderStatus = (
+  status: Order['status']
+): BookCarrierResult => ({
+  outcome: 'INVALID_ORDER_STATUS',
+  expected: 'QUOTED',
+  actual: status,
+});
