@@ -1,6 +1,9 @@
 import { orderStatus } from '../domain/entities';
 import { z } from 'zod-http-schemas';
-import { validationHandler, withAsyncErrorHandling } from './middleware/handlers';
+import {
+  validationHandler,
+  withAsyncErrorHandling,
+} from './middleware/handlers';
 import { getOrders } from '../domain/operations/getOrders';
 
 const schema = {

@@ -46,7 +46,7 @@ export const deriveBookCarrierOutcome = (
     case 'QUOTED':
       return deriveBookedState(order, carrier);
   }
-  throw new isNever(`Unexpected order status '${order?.status}'`)
+  throw new isNever(`Unexpected order status '${order?.status}'`);
 };
 
 const deriveBookedState = (

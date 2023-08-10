@@ -4,7 +4,10 @@ import {
   CreateOrderResult,
 } from '../domain/operations/createOrder';
 import { orderInputSchema } from '../domain/entities';
-import { validationHandler, withAsyncErrorHandling } from './middleware/handlers';
+import {
+  validationHandler,
+  withAsyncErrorHandling,
+} from './middleware/handlers';
 
 const schema = {
   body: orderInputSchema,

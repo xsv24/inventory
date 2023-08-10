@@ -59,19 +59,16 @@ const requestValidator = <T>(
   const { schema: validator, error, value } = options;
   const result = validator.safeParse(value);
 
-  if (!result.success) {
-    logger.error(
-      `Request validation error: '${error}, ${result.error.message}'`,
-      { error: result.error }
-    );
-    return {
-      success: false,
-      error: {
-        validationError: result.error,
-        type: error,
-      },
-    };
+  if (result.success) {
+    return { success: true, value: result.data };
   }
 
-  return { success: true, value: result.data };
+  logger.error('Request validation error occurred', { error: result.error });
+  return {
+    success: false,
+    error: {
+      error,
+      details: result.error.issues,
+    },
+  };
 };

@@ -23,12 +23,12 @@ export const handleGetHealthz: RequestHandler = withAsyncErrorHandling(
           logger.error(
             'Health check failed, due to repository connection error'
           );
-          res.status(500).json(response);
+          res.status(503).json(response);
           break;
       }
     } catch (e) {
       logger.error('Health check failed', e);
-      res.sendStatus(500).json(response);
+      res.sendStatus(503).json(response);
     }
   }
 );

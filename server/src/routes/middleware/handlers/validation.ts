@@ -4,6 +4,7 @@ import {
   VALIDATION_STATUS_CODE_MAP,
   ValidationResponseError,
 } from '../../models/error';
+import { isNever } from '../../../common/utils';
 
 export type ValidRequest<Params, Query, Body> = {
   params: Params;
@@ -33,7 +34,6 @@ export const validationHandler = <
   handler: ValidationHandler<Params, Query, Body>
 ): RequestHandler => {
   return (req: Request, res: Response, next: NextFunction) => {
-    // TODO: Make this a lazy find, by only executing functions upon iteration with a generator
     const validator = validatorContext(req);
 
     const params = validator.validateUrlParam(request.params);
@@ -63,12 +63,14 @@ export const validationHandler = <
 
 export const sendValidationError = (
   res: Response,
-  error: ValidationResponseError
+  validationError: ValidationResponseError
 ): void => {
-  const status = VALIDATION_STATUS_CODE_MAP[error.type];
+  const status = VALIDATION_STATUS_CODE_MAP[validationError.error];
+  if (!status) {
+    throw new isNever(
+      `Unexpected validation error variant '${validationError.error}'`
+    );
+  }
 
-  res.status(status).json({
-    error: error.type,
-    validationError: error.validationError,
-  });
+  res.status(status).json(validationError);
 };
