@@ -64,6 +64,23 @@ describe('createOrderQuote.deriver', () => {
       };
       expect(result).to.deep.eq(expected);
     });
+
+    it('returns ORDER_ALREADY_BOOKED if order is already booked', () => {
+      const quote: CarrierQuote = { carrier: 'UPS', priceCents: 805 };
+      const order: Order = {
+        ...mockOrder,
+        status: 'BOOKED',
+        quotes: [quote],
+      };
+
+      const result = deriveOrderQuoteResult(order, ['UPS', 'FEDEX', 'USPS']);
+
+      const expected: CreateOrderQuoteResult = {
+        outcome: 'ORDER_ALREADY_BOOKED',
+        order,
+      };
+      expect(result).to.deep.eq(expected);
+    });
   });
 
   describe('order with an expected status', () => {
