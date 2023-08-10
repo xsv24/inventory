@@ -1,23 +1,18 @@
-import { withAsyncErrorHandling } from './withAsyncErrorHandling';
+import { withAsyncErrorHandling } from './middleware/withAsyncErrorHandling';
 import { ordersRepo } from '../repos/ordersRepo';
 import { orderStatus } from '../domain/entities';
 import { z } from 'zod-http-schemas';
+import { validationHandler } from './middleware/validation';
 
-const queryParams = z.object({
-  status: orderStatus.optional(),
-});
+const schema = {
+  query: z.object({ status: orderStatus.optional() }),
+  params: z.any(),
+  body: z.any(),
+};
 
-export const handleGetOrders = withAsyncErrorHandling(async (req, res) => {
-  const parseResult = queryParams.safeParse(req.query);
-  if (!parseResult.success) {
-    res.status(400).json({
-      error: 'INVALID_QUERY_PARAMETER',
-      validationError: parseResult.error,
-    });
-    return;
-  }
-
-  const orders = await ordersRepo.getOrders(parseResult.data.status);
-
+const handler = validationHandler(schema, async (values, _, res) => {
+  const orders = await ordersRepo.getOrders(values.query.status);
   res.json({ orders });
 });
+
+export const handleGetOrders = withAsyncErrorHandling(handler);

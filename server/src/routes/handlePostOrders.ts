@@ -1,26 +1,28 @@
-import { withAsyncErrorHandling } from './withAsyncErrorHandling';
+import { withAsyncErrorHandling } from './middleware/withAsyncErrorHandling';
+import { z } from 'zod';
 import {
   createOrder,
   CreateOrderResult,
 } from '../domain/operations/createOrder';
 import { orderInputSchema } from '../domain/entities';
+import { validationHandler } from './middleware/validation';
 
-export const handlePostOrders = withAsyncErrorHandling(async (req, res) => {
-  const parseResult = orderInputSchema.safeParse(req.body);
-  if (!parseResult.success) {
-    res.status(400).json({
-      error: 'INVALID_REQUEST_PAYLOAD',
-      validationError: parseResult.error,
-    });
-    return;
-  }
+const schema = {
+  body: orderInputSchema,
+  params: z.any(),
+  query: z.any(),
+};
 
-  const result = await createOrder(parseResult.data);
+const outcomeStatusCodeMap: Record<CreateOrderResult['outcome'], number> = {
+  SUCCESS: 200,
+  ORDER_ALREADY_EXISTS: 200,
+  ORDER_HAS_NO_LINE_ITEMS: 400,
+};
 
-  const outcomeStatusCodeMap: Record<CreateOrderResult['outcome'], number> = {
-    SUCCESS: 200,
-    ORDER_ALREADY_EXISTS: 200,
-    ORDER_HAS_NO_LINE_ITEMS: 400,
-  };
+const handler = validationHandler(schema, async (values, _, res) => {
+  const result = await createOrder(values.body);
+
   res.status(outcomeStatusCodeMap[result.outcome]).json(result);
 });
+
+export const handlePostOrders = withAsyncErrorHandling(handler);
