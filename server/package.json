@@ -17,7 +17,8 @@
   "scripts": {
     "start": "ts-node ./src/index.ts",
     "start:dev": "nodemon ./src/index.ts",
-    "test": "npx mocha"
+    "build": "rm -rf ./dist && tsc --outDir ./dist",
+    "test": "mocha"
   },
   "mocha": {
     "recursive": true,

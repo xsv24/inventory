@@ -8,8 +8,15 @@
     "strict": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "noImplicitAny": true
+    "noImplicitAny": true,
+    "strictFunctionTypes": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true
   },
-  "include": [".eslintrc.js", "src"],
-  "exclude": ["node_modules", "*.test.ts"]
+  "include": [".eslintrc.js", "server/src"],
+  "exclude": ["node_modules", "*.test.ts"],
+  "ts-node": {
+    "files": true
+  }
 }

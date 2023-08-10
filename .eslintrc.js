@@ -26,5 +26,6 @@ module.exports = {
     '@typescript-eslint/comma-dangle': ['error', 'only-multiline'],
     semi: 'off',
     '@typescript-eslint/semi': ['error', 'always'],
+    '@typescript-eslint/no-explicit-any': 'error',
   },
 };
