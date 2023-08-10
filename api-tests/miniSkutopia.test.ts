@@ -1,12 +1,13 @@
 import axios from 'axios';
 import { expect } from 'chai';
 import {
-  calculateCarrierFees,
+  buildOrder,
   generateQuote,
   loadFixture,
   SalesOrder,
   unwrap,
 } from './util';
+import config from '../server/src/config';
 
 const apiClient = axios.create({
   baseURL: 'http://localhost:8044/',
@@ -21,24 +22,31 @@ const ORDERS = loadFixture<{ salesOrders: SalesOrder[] }>(
 
 describe('A mini SKUTOPIA API', () => {
   it('should successfully receive an order', async () => {
-    const order = unwrap(ORDERS[0]);
-    const result = await apiClient.post('/orders', order);
+    const uncreated = unwrap(ORDERS[0]);
+    const result = await apiClient.post('/orders', uncreated);
     expect(result.status).to.eq(200);
     expect(result.data).to.deep.eq({
       outcome: 'SUCCESS',
-      order: {
-        ...order,
-        quotes: [],
+      order: buildOrder({
+        order: uncreated,
         status: 'RECEIVED',
-      },
+        quoted: [],
+      }),
     });
   });
 
   it('should list all orders', async () => {
+    const created = unwrap(ORDERS[0]);
     const result = await apiClient.get('/orders');
     expect(result.status).to.eq(200);
     expect(result.data).to.deep.eq({
-      orders: [{ ...ORDERS[0], status: 'RECEIVED', quotes: [] }],
+      orders: [
+        buildOrder({
+          order: created,
+          status: 'RECEIVED',
+          quoted: [],
+        }),
+      ],
     });
   });
 
@@ -50,22 +58,18 @@ describe('A mini SKUTOPIA API', () => {
   });
 
   it('should generate a quote for a RECEIVED order', async () => {
-    const order = unwrap(ORDERS[0]);
-    const result = await apiClient.post(`/orders/${order.id}/quotes`, {
+    const received = unwrap(ORDERS[0]);
+    const result = await apiClient.post(`/orders/${received.id}/quotes`, {
       carriers: ['UPS', 'USPS', 'FEDEX'],
     });
     expect(result.status).to.eq(200);
     expect(result.data).to.deep.eq({
       outcome: 'SUCCESS',
-      order: {
-        ...order,
+      order: buildOrder({
+        order: received,
         status: 'QUOTED',
-        quotes: [
-          generateQuote(order, 'UPS'),
-          generateQuote(order, 'USPS'),
-          generateQuote(order, 'FEDEX'),
-        ],
-      },
+        quoted: ['UPS', 'USPS', 'FEDEX'],
+      }),
     });
   });
 
@@ -87,17 +91,29 @@ describe('A mini SKUTOPIA API', () => {
     expect(result.status).to.eq(200);
     expect(result.data).to.deep.eq({
       outcome: 'SUCCESS',
-      order: {
-        ...order,
+      order: buildOrder({
+        order,
         status: 'BOOKED',
-        quotes: [
-          generateQuote(order, 'UPS'),
-          generateQuote(order, 'USPS'),
-          generateQuote(order, 'FEDEX'),
-        ],
-        carrierPricePaid: calculateCarrierFees('UPS', order.items),
-        carrierBooked: 'UPS',
-      },
+        booked: 'UPS',
+        quoted: ['UPS', 'USPS', 'FEDEX'],
+      }),
+    });
+  });
+
+  it('should return ORDER ALREADY BOOKED when requesting a booking for a BOOKED order', async () => {
+    const order = unwrap(ORDERS[0]);
+    const result = await apiClient.post(`/orders/${order.id}/bookings`, {
+      carrier: 'UPS',
+    });
+    expect(result.status).to.eq(400);
+    expect(result.data).to.deep.eq({
+      outcome: 'ORDER_ALREADY_BOOKED',
+      order: buildOrder({
+        order,
+        status: 'BOOKED',
+        booked: 'UPS',
+        quoted: ['UPS', 'USPS', 'FEDEX'],
+      }),
     });
   });
 
@@ -112,71 +128,107 @@ describe('A mini SKUTOPIA API', () => {
     expect(result.status).to.eq(400);
     expect(result.data).to.deep.eq({
       outcome: 'NO_MATCHING_QUOTE',
-      quotes: [
-        generateQuote(order, 'USPS'),
-        generateQuote(order, 'FEDEX'),
-      ],
+      quotes: [generateQuote(order, 'USPS'), generateQuote(order, 'FEDEX')],
     });
   });
 
   it('should return ORDER ALREADY BOOKED when requesting a quote for a BOOKED order', async () => {
-    const order = unwrap(ORDERS[0]);
-    const result = await apiClient.post(`/orders/${order.id}/quotes`, {
+    const booked = unwrap(ORDERS[0]);
+    const result = await apiClient.post(`/orders/${booked.id}/quotes`, {
       carriers: ['UPS', 'FEDEX', 'USPS'],
     });
     expect(result.status).to.eq(400);
     expect(result.data).to.deep.eq({
       outcome: 'ORDER_ALREADY_BOOKED',
+      order: buildOrder({
+        order: booked,
+        status: 'BOOKED',
+        booked: 'UPS',
+        quoted: ['UPS', 'USPS', 'FEDEX'],
+      }),
+    });
+  });
+
+  it('should return CARRIER ALREADY BOOKED when requesting a quote for a BOOKED order', async () => {
+    const quoted = unwrap(ORDERS[1]);
+    const result = await apiClient.post(`/orders/${quoted.id}/quotes`, {
+      carriers: ['UPS', 'FEDEX', 'USPS'],
+    });
+    expect(result.status).to.eq(400);
+    expect(result.data).to.deep.eq({
+      outcome: 'CARRIER_ALREADY_QUOTED',
+      quote: generateQuote(quoted, 'USPS'),
     });
   });
 
   it('should list more orders', async () => {
-    const order = unwrap(ORDERS[0]);
-    const order1 = unwrap(ORDERS[1]);
+    const booked = unwrap(ORDERS[0]);
+    const quoted = unwrap(ORDERS[1]);
+    const received = unwrap(ORDERS[2]);
+
     const result = await apiClient.get('/orders');
     expect(result.status).to.eq(200);
     expect(result.data).to.deep.eq({
       orders: [
-        {
-          ...order,
+        buildOrder({
+          order: booked,
           status: 'BOOKED',
-          carrierPricePaid: calculateCarrierFees('UPS', order.items),
-          carrierBooked: 'UPS',
-          quotes: [
-            generateQuote(order, 'UPS'),
-            generateQuote(order, 'USPS'),
-            generateQuote(order, 'FEDEX'),
-          ],
-        },
-        {
-          ...order1,
+          booked: 'UPS',
+          quoted: ['UPS', 'USPS', 'FEDEX'],
+        }),
+        buildOrder({
+          order: quoted,
           status: 'QUOTED',
-          quotes: [
-            generateQuote(order1, 'USPS'),
-            generateQuote(order1, 'FEDEX'),
-          ],
-        },
-        { ...unwrap(ORDERS[2]), status: 'RECEIVED', quotes: [] },
+          quoted: ['USPS', 'FEDEX'],
+        }),
+        buildOrder({
+          order: received,
+          status: 'RECEIVED',
+          quoted: [],
+        }),
       ],
     });
   });
 
   it('should list the BOOKED orders', async () => {
-    const order = unwrap(ORDERS[0]);
+    const booked = unwrap(ORDERS[0]);
     const result = await apiClient.get('/orders?status=BOOKED');
     expect(result.status).to.eq(200);
     expect(result.data).to.deep.eq({
       orders: [
-        {
-          ...order,
+        buildOrder({
+          order: booked,
           status: 'BOOKED',
-          carrierPricePaid: calculateCarrierFees('UPS', order.items),
-          carrierBooked: 'UPS',
-          quotes: [
-            generateQuote(order, 'UPS'),
-            generateQuote(order, 'USPS'),
-            generateQuote(order, 'FEDEX'),
-          ],
+          booked: 'UPS',
+          quoted: ['UPS', 'USPS', 'FEDEX'],
+        }),
+      ],
+    });
+  });
+
+  it('/healthz should return build meta data', async () => {
+    const result = await apiClient.get('/healthz');
+    expect(result.status).to.eq(200);
+    expect(result.data).to.deep.eq({
+      buildNumber: config.BUILD_NUMBER,
+      commitHash: config.COMMIT_HASH,
+    });
+  });
+
+  it('Validation checks', async () => {
+    const result = await apiClient.get('/orders?status=INVALID_STATUS');
+
+    expect(result.status).to.eq(400);
+    expect(result.data).to.deep.eq({
+      error: 'INVALID_QUERY_PARAMETER',
+      details: [
+        {
+          code: 'invalid_enum_value',
+          message:
+            "Invalid enum value. Expected 'RECEIVED' | 'QUOTED' | 'BOOKED' | 'CANCELLED', received 'INVALID_STATUS'",
+          options: ['RECEIVED', 'QUOTED', 'BOOKED', 'CANCELLED'],
+          path: ['status'],
+          received: 'INVALID_STATUS',
         },
       ],
     });

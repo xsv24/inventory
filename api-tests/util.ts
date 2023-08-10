@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import { Order } from '../server/src/domain/entities';
 
 export type Carrier = 'UPS' | 'FEDEX' | 'USPS';
 
@@ -46,9 +47,34 @@ export const generateQuote = (
 });
 
 export const unwrap = <T>(value: T | undefined | null) => {
-    if(!value) {
-        throw new Error("Failed to unwrap value");
-    }
+  if (!value) {
+    throw new Error('Failed to unwrap value');
+  }
 
-    return value;
-}
+  return value;
+};
+
+export const buildOrder = (options: {
+  order: SalesOrder;
+  status: Order['status'];
+  quoted: Carrier[];
+  booked?: Carrier;
+}): Order => {
+  const { order, status, quoted, booked } = options;
+  const base = {
+    ...order,
+    status,
+    quotes: quoted.map((carrier) => generateQuote(order, carrier)),
+  };
+
+  // Hod to do this to avoid assertion error on 'undefined's
+  return !booked
+    ? base
+    : {
+        ...base,
+        carrierPricePaid: booked
+          ? calculateCarrierFees(booked, order.items)
+          : undefined,
+        carrierBooked: booked,
+      };
+};

@@ -15,7 +15,7 @@ const schema = {
 
 const outcomeStatusCodeMap: Record<BookCarrierResult['outcome'], number> = {
   SUCCESS: 200,
-  ORDER_ALREADY_BOOKED: 200,
+  ORDER_ALREADY_BOOKED: 400,
   ORDER_NOT_FOUND: 404,
   NO_MATCHING_QUOTE: 400,
   INVALID_ORDER_STATUS: 400,

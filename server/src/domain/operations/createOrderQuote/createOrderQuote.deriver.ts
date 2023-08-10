@@ -16,11 +16,11 @@ type OrderNotFound = {
 };
 type OrderAlreadyBooked = {
   outcome: 'ORDER_ALREADY_BOOKED';
+  order: Order;
 };
 type CarrierAlreadyQuoted = {
   outcome: 'CARRIER_ALREADY_QUOTED';
   quote: CarrierQuote;
-  order: Order;
 };
 
 export type CreateOrderQuoteResult =
@@ -42,11 +42,11 @@ export const deriveOrderQuoteResult = (
     case 'RECEIVED':
       return deriveReceivedState(order, carriers);
     case 'BOOKED':
-      return deriveAlreadyBookedState();
+      return deriveAlreadyBookedState(order);
     case 'CANCELLED':
       return deriveInvalidState(order.status);
   }
-  throw new isNever(`Unexpected order status '${order?.status}'`)
+  throw new isNever(`Unexpected order status '${order?.status}'`);
 };
 
 const deriveQuotedState = (
@@ -72,7 +72,6 @@ const deriveQuotedState = (
     return {
       outcome: 'CARRIER_ALREADY_QUOTED',
       quote: alreadyQuoted,
-      order,
     };
   }
 
@@ -116,6 +115,7 @@ const deriveNotFoundState = (): CreateOrderQuoteResult => ({
   outcome: 'ORDER_NOT_FOUND',
 });
 
-const deriveAlreadyBookedState = (): CreateOrderQuoteResult => ({
+const deriveAlreadyBookedState = (order: Order): CreateOrderQuoteResult => ({
   outcome: 'ORDER_ALREADY_BOOKED',
+  order,
 });

@@ -5,8 +5,8 @@ export type ValidationErrorType =
   | 'NOT_FOUND';
 
 export type ValidationResponseError = {
-  type: ValidationErrorType;
-  validationError: any;
+  error: ValidationErrorType;
+  details: Zod.ZodIssue[];
 };
 
 export const VALIDATION_STATUS_CODE_MAP: Record<ValidationErrorType, number> = {
