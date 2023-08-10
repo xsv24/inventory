@@ -1,13 +1,13 @@
-import { carrierCodeSchema } from '../domain/entities';
+import { carrierCodeSchema } from '../../domain/entities';
 import { z } from 'zod-http-schemas';
 import {
   validationHandler,
   withAsyncErrorHandling,
-} from './middleware/handlers';
+} from '../middleware/handlers';
 import {
   createOrderQuote,
   CreateOrderQuoteResult,
-} from '../domain/operations/createOrderQuote';
+} from '../../domain/operations/createOrderQuote';
 
 const schema = {
   body: z.object({ carriers: z.array(carrierCodeSchema).nonempty() }),

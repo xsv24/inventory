@@ -2,12 +2,12 @@ import { z } from 'zod-http-schemas';
 import {
   createOrder,
   CreateOrderResult,
-} from '../domain/operations/createOrder';
-import { orderInputSchema } from '../domain/entities';
+} from '../../domain/operations/createOrder';
+import { orderInputSchema } from '../../domain/entities';
 import {
   validationHandler,
   withAsyncErrorHandling,
-} from './middleware/handlers';
+} from '../middleware/handlers';
 
 const schema = {
   body: orderInputSchema,

@@ -1,11 +1,11 @@
-import { withAsyncErrorHandling } from './middleware/handlers';
-import { carrierCodeSchema } from '../domain/entities';
+import { withAsyncErrorHandling } from '../middleware/handlers';
+import { carrierCodeSchema } from '../../domain/entities';
 import { z } from 'zod-http-schemas';
 import {
   bookCarrier,
   BookCarrierResult,
-} from '../domain/operations/bookCarrier';
-import { validationHandler } from './middleware/handlers';
+} from '../../domain/operations/bookCarrier';
+import { validationHandler } from '../middleware/handlers';
 
 const schema = {
   body: z.object({ carrier: carrierCodeSchema }),

@@ -3,10 +3,12 @@ import { errorLoggingMiddleware, logger } from '@skutopia/logger';
 import config from './config';
 import { lifecycle } from './lifecycle/lifecycle';
 import { handleGetHealthz } from './routes/probes/healthz';
-import { handleGetOrders } from './routes/handleGetOrders';
-import { handlePostOrders } from './routes/handlePostOrders';
-import { handlePostOrderBookings } from './routes/handlePostOrderBookings';
-import { handlePostOrderQuotes } from './routes/handlePostOrderQuotes';
+import {
+  handleGetOrders,
+  handlePostOrders,
+  handlePostOrderBookings,
+  handlePostOrderQuotes,
+} from './routes/handlers';
 import { withMiddleware } from './routes/middleware';
 
 export const startServer = () => {
