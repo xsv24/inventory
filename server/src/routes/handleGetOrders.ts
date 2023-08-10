@@ -11,7 +11,12 @@ const schema = {
 };
 
 const handler = validationHandler(schema, async (values, _, res) => {
-  const orders = await ordersRepo.getOrders(values.query.status);
+  // TODO: Refactor this so it's not using the repo directly
+  const orders = await ordersRepo.filter(
+    values.query.status
+      ? (order) => order.status === values.query.status
+      : undefined
+  );
   res.json({ orders });
 });
 
