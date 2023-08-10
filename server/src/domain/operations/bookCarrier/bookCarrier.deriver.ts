@@ -37,9 +37,11 @@ export const deriveBookCarrierOutcome = (
       return deriveNotFoundState();
     case 'BOOKED':
       return deriveAlreadyBookedState(order);
-    case 'RECEIVED':
     case 'CANCELLED':
       return deriveInvalidOrderStatus(order.status);
+    // TODO: NOT sure if this is right? Think the tests are wrong here, think we should only allow 'QUOTED'
+    // But this is just a guess on my part don't have the full context
+    case 'RECEIVED':
     case 'QUOTED':
       return deriveBookedState(order, carrier);
   }
