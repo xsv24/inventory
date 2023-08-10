@@ -1,4 +1,4 @@
-import { RequestHandler } from 'express';
+import { Request, RequestHandler, Response } from 'express';
 import { logger } from '@skutopia/logger';
 import { withAsyncErrorHandling } from '../middleware/withAsyncErrorHandling';
 import { ordersRepo } from '../../repos/ordersRepo';
@@ -10,19 +10,21 @@ const response = {
 };
 
 export const handleGetHealthz: RequestHandler = withAsyncErrorHandling(
-  async (req, res) => {
+  async (_: Request, res: Response): Promise<void> => {
     try {
       // const queryResult = await pool.query(`SELECT 1`);
       const connection = await ordersRepo.connection();
 
       switch (connection) {
         case 'CONNECTION_OK':
-          return res.status(200).json(response);
+          res.status(200).json(response);
+          break;
         case 'CONNECTION_BAD':
           logger.error(
             'Health check failed, due to repository connection error'
           );
-          return res.status(500).json(response);
+          res.status(500).json(response);
+          break;
       }
     } catch (e) {
       logger.error('Health check failed', e);

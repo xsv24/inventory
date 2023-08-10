@@ -44,3 +44,11 @@ export const generateQuote = (
   carrier,
   priceCents: calculateCarrierFees(carrier, order.items),
 });
+
+export const unwrap = <T>(value: T | undefined | null) => {
+    if(!value) {
+        throw new Error("Failed to unwrap value");
+    }
+
+    return value;
+}

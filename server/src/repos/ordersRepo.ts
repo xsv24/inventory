@@ -26,9 +26,9 @@ const update = async (
   if (!currentOrder) {
     throw new Error(`Order matching ${order.id} does not exist`);
   }
-  Object.assign(ORDERS[order.id], order);
+  Object.assign(currentOrder, order);
 
-  return ORDERS[order.id];
+  return currentOrder;
 };
 
 // TODO: Repository throws errors would be nice to return a result

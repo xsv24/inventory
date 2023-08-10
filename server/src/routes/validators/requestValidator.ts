@@ -1,5 +1,5 @@
 import { logger } from '@skutopia/logger';
-import { Request, Response } from 'express';
+import { Request } from 'express';
 import { ValidationErrorType, ValidationResponseError } from '../models/error';
 
 export type ValidatorContext = {
