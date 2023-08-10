@@ -1,10 +1,11 @@
-import { NextFunction, Request, RequestHandler, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { validatorContext } from '../../validators/requestValidator';
 import {
   VALIDATION_STATUS_CODE_MAP,
   ValidationResponseError,
 } from '../../models/error';
 import { isNever } from '../../../common/utils';
+import { AsyncHandler } from './withAsyncErrorHandling';
 
 export type ValidRequest<Params, Query, Body> = {
   params: Params;
@@ -23,17 +24,18 @@ export type ValidationHandler<Params, Query, Body> = (
   req: Request,
   res: Response,
   next: NextFunction
-) => void;
+) => Promise<void>;
 
-export const validationHandler = <
-  Params = Zod.ZodUndefined,
-  Query = Zod.ZodUndefined,
-  Body = Zod.ZodUndefined,
->(
-  request: RequestSchema<Params, Query, Body>,
-  handler: ValidationHandler<Params, Query, Body>
-): RequestHandler => {
-  return (req: Request, res: Response, next: NextFunction) => {
+export const validationHandler =
+  <
+    Params = Zod.ZodUndefined,
+    Query = Zod.ZodUndefined,
+    Body = Zod.ZodUndefined,
+  >(
+    request: RequestSchema<Params, Query, Body>,
+    handler: ValidationHandler<Params, Query, Body>
+  ): AsyncHandler =>
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const validator = validatorContext(req);
 
     const params = validator.validateUrlParam(request.params);
@@ -57,9 +59,8 @@ export const validationHandler = <
       body: body.value,
     };
 
-    return handler(validRequest, req, res, next);
+    return await handler(validRequest, req, res, next);
   };
-};
 
 export const sendValidationError = (
   res: Response,

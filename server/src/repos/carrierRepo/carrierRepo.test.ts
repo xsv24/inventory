@@ -37,7 +37,10 @@ describe('carrierRepo', () => {
     const fedex = carrierRepo.createQuote('FEDEX', items);
 
     const expected = (pricing: CarrierPricing): number =>
-        items.reduce((total, item) => total + item.gramsPerItem * pricing.gramsPerItemRate, pricing.minCentPrice)
+      items.reduce(
+        (total, item) => total + item.gramsPerItem * pricing.gramsPerItemRate,
+        pricing.minCentPrice
+      );
 
     expect(ups.priceCents).to.deep.eq(expected(UPS));
     expect(usps.priceCents).to.eq(expected(USPS));

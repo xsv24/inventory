@@ -7,11 +7,8 @@ export type AsyncHandler = (
   next: NextFunction
 ) => Promise<void>;
 
-// We have an synchronous handler type too just so all the types else where don't have to be updated to be async as well.
-export type SyncHandler = RequestHandler;
-
 export const withAsyncErrorHandling =
-  (handler: SyncHandler | AsyncHandler): RequestHandler =>
+  (handler: AsyncHandler): RequestHandler =>
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       await handler(req, res, next);
