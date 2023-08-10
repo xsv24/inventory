@@ -21,8 +21,8 @@ const outcomeStatusCodeMap: Record<CreateOrderResult['outcome'], number> = {
   ORDER_HAS_NO_LINE_ITEMS: 400,
 };
 
-const handler = validationHandler(schema, async (values, _, res) => {
-  const result = await createOrder(values.body);
+const handler = validationHandler(schema, async (req, res) => {
+  const result = await createOrder(req.body);
 
   res.status(outcomeStatusCodeMap[result.outcome]).json(result);
 });

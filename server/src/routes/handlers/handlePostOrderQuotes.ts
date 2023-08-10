@@ -24,8 +24,8 @@ const outcomeStatusCodeMap: Record<CreateOrderQuoteResult['outcome'], number> =
     INVALID_ORDER_STATUS: 400,
   };
 
-const handler = validationHandler(schema, async (values, _, res) => {
-  const { params, body } = values;
+const handler = validationHandler(schema, async (req, res) => {
+  const { params, body } = req;
   const createOrderQuoteResult = await createOrderQuote(
     params.id,
     body.carriers

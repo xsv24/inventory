@@ -12,8 +12,8 @@ const schema = {
   body: z.any(),
 };
 
-const handler = validationHandler(schema, async (values, _, res) => {
-  const orders = await getOrders(values.query.status);
+const handler = validationHandler(schema, async (req, res) => {
+  const orders = await getOrders(req.query.status);
   res.json({ orders });
 });
 

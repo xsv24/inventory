@@ -7,12 +7,6 @@ import {
 import { isNever } from '../../../common/utils';
 import { AsyncHandler } from './withAsyncErrorHandling';
 
-export type ValidRequest<Params, Query, Body> = {
-  params: Params;
-  query: Query;
-  body: Body;
-};
-
 export type RequestSchema<Params, Query, Body> = {
   params: Zod.ZodType<Params>;
   query: Zod.ZodType<Query>;
@@ -20,22 +14,19 @@ export type RequestSchema<Params, Query, Body> = {
 };
 
 export type ValidationHandler<Params, Query, Body> = (
-  values: ValidRequest<Params, Query, Body>,
-  req: Request,
+  req: Request<Params,any, Body, Query>,
   res: Response,
   next: NextFunction
 ) => Promise<void>;
 
-export const validationHandler =
-  <
-    Params = Zod.ZodUndefined,
-    Query = Zod.ZodUndefined,
-    Body = Zod.ZodUndefined,
-  >(
-    request: RequestSchema<Params, Query, Body>,
-    handler: ValidationHandler<Params, Query, Body>
-  ): AsyncHandler =>
-  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const validationHandler = <
+  Params = Zod.ZodUndefined,
+  Query = Zod.ZodUndefined,
+  Body = Zod.ZodUndefined,
+>(
+  request: RequestSchema<Params, Query, Body>,
+  handler: ValidationHandler<Params, Query, Body>
+): AsyncHandler => async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const validator = validatorContext(req);
 
     const params = validator.validateUrlParam(request.params);
@@ -53,13 +44,8 @@ export const validationHandler =
       return sendValidationError(res, body.error);
     }
 
-    const validRequest = {
-      params: params.value,
-      query: query.value,
-      body: body.value,
-    };
-
-    return await handler(validRequest, req, res, next);
+    // TODO: type the response ResBody
+    return await handler(req as Request<Params, any, Body, Query>, res, next);
   };
 
 export const sendValidationError = (
