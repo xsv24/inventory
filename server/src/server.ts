@@ -13,6 +13,7 @@ import { handleGetHealthz } from './routes/probes/healthz';
 import { handleGetOrders } from './routes/handleGetOrders';
 import { handlePostOrders } from './routes/handlePostOrders';
 import { handlePostOrderBookings } from './routes/handlePostOrderBookings';
+import { handlePostOrderQuotes } from './routes/handlePostOrderQuotes';
 
 export const startServer = () => {
   const app = express();
@@ -20,6 +21,7 @@ export const startServer = () => {
   app.use(compression());
   app.use(
     helmet({
+      // TODO: Make this more secure
       contentSecurityPolicy: false,
     })
   );
@@ -35,7 +37,7 @@ export const startServer = () => {
   // routes
   app.get('/orders', handleGetOrders);
   app.post('/orders', handlePostOrders);
-  app.post('/orders/:id/quotes' /* TODO implement this route */);
+  app.post('/orders/:id/quotes', handlePostOrderQuotes);
   app.post('/orders/:id/bookings', handlePostOrderBookings);
 
   app.use(errorLoggingMiddleware);

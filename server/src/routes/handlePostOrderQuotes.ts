@@ -22,6 +22,7 @@ const outcomeStatusCodeMap: Record<CreateOrderQuoteResult['outcome'], number> =
     SUCCESS: 200,
     ORDER_NOT_FOUND: 404,
     CARRIER_ALREADY_QUOTED: 400,
+    ORDER_ALREADY_BOOKED: 400,
     INVALID_ORDER_STATUS: 400,
   };
 
