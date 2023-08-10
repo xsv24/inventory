@@ -1,8 +1,8 @@
 import { withAsyncErrorHandling } from './middleware/withAsyncErrorHandling';
-import { ordersRepo } from '../repos/ordersRepo';
 import { orderStatus } from '../domain/entities';
 import { z } from 'zod-http-schemas';
 import { validationHandler } from './middleware/validation';
+import { getOrders } from '../domain/operations/getOrders';
 
 const schema = {
   query: z.object({ status: orderStatus.optional() }),
@@ -11,12 +11,7 @@ const schema = {
 };
 
 const handler = validationHandler(schema, async (values, _, res) => {
-  // TODO: Refactor this so it's not using the repo directly
-  const orders = await ordersRepo.filter(
-    values.query.status
-      ? (order) => order.status === values.query.status
-      : undefined
-  );
+  const orders = await getOrders(values.query.status);
   res.json({ orders });
 });
 
