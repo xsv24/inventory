@@ -16,7 +16,7 @@ export const withAsyncErrorHandling =
     try {
       await handler(req, res, next);
     } catch (e) {
-      logger.error("An unexpected error occurred", e);
+      logger.error('An unexpected error occurred', e);
       res.sendStatus(500);
     }
   };

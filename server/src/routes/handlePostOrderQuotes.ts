@@ -6,7 +6,10 @@ import {
   BookCarrierResult,
 } from '../domain/operations/bookCarrier';
 import { validationHandler } from './middleware/validation';
-import { createOrderQuote } from '../domain/operations/createOrderQuote';
+import {
+  createOrderQuote,
+  CreateOrderQuoteResult,
+} from '../domain/operations/createOrderQuote';
 
 const schema = {
   body: z.object({ carriers: z.array(carrierCodeSchema).nonempty() }),
@@ -14,13 +17,13 @@ const schema = {
   query: z.any(),
 };
 
-const outcomeStatusCodeMap: Record<BookCarrierResult['outcome'], number> = {
-  SUCCESS: 200,
-  ORDER_ALREADY_BOOKED: 200,
-  ORDER_NOT_FOUND: 404,
-  NO_MATCHING_QUOTE: 400,
-  INVALID_ORDER_STATUS: 400,
-};
+const outcomeStatusCodeMap: Record<CreateOrderQuoteResult['outcome'], number> =
+  {
+    SUCCESS: 200,
+    ORDER_NOT_FOUND: 404,
+    CARRIER_ALREADY_QUOTED: 400,
+    INVALID_ORDER_STATUS: 400,
+  };
 
 const handler = validationHandler(schema, async (values, _, res) => {
   const { params, body } = values;
@@ -28,7 +31,6 @@ const handler = validationHandler(schema, async (values, _, res) => {
     params.id,
     body.carriers
   );
-  console.log(values, createOrderQuoteResult);
 
   res
     .status(outcomeStatusCodeMap[createOrderQuoteResult.outcome])

@@ -1,6 +1,6 @@
 import { RequestHandler } from 'express';
 import { logger } from '@skutopia/logger';
-import { withAsyncErrorHandling } from '../withAsyncErrorHandling';
+import { withAsyncErrorHandling } from '../middleware/withAsyncErrorHandling';
 import { ordersRepo } from '../../repos/ordersRepo';
 import config from '../../config';
 
@@ -17,7 +17,7 @@ export const handleGetHealthz: RequestHandler = withAsyncErrorHandling(
         return;
       }
     } catch (e) {
-      logger.error(e);
+      logger.error('Health check failed', e);
     }
     res.sendStatus(500);
   }
