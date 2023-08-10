@@ -1,3 +1,4 @@
+import { isNever } from '../../../common/utils';
 import { carrierRepo } from '../../../repos/carrierRepo';
 import { CarrierCode, CarrierQuote, Order } from '../../entities';
 
@@ -45,6 +46,7 @@ export const deriveOrderQuoteResult = (
     case 'CANCELLED':
       return deriveInvalidState(order.status);
   }
+  throw new isNever(`Unexpected order status '${order?.status}'`)
 };
 
 const deriveQuotedState = (

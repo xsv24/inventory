@@ -1,3 +1,4 @@
+import { isNever } from '../../../common/utils';
 import { CarrierCode, CarrierQuote, Order } from '../../entities';
 
 type Success = {
@@ -45,6 +46,7 @@ export const deriveBookCarrierOutcome = (
     case 'QUOTED':
       return deriveBookedState(order, carrier);
   }
+  throw new isNever(`Unexpected order status '${order?.status}'`)
 };
 
 const deriveBookedState = (
